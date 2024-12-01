@@ -44,6 +44,11 @@ SENDER_EMAIL = "your_sender_email"
 # SENDER_EMAIL = "your_sender_email"
 RECEIVER_EMAIL = "your_receiver_email"
 
+# Telegram notification settings
+TELEGRAM_BOT_TOKEN = ""  # Your Telegram bot token from @BotFather
+TELEGRAM_CHAT_ID = ""    # Your Telegram chat ID where notifications will be sent
+TELEGRAM_NOTIFICATIONS_ENABLED = False  # Set to True to enable Telegram notifications
+
 # How often do we perform checks for user activity, you can also use -c parameter; in seconds
 INSTA_CHECK_INTERVAL = 5400  # 1,5 hours
 
@@ -749,6 +754,10 @@ def detect_changed_profile_picture(user, profile_image_url, profile_pic_file, pr
                         else:
                             send_email(m_subject, m_body, m_body_html, SMTP_SSL)
 
+                if TELEGRAM_NOTIFICATIONS_ENABLED:
+                    telegram_message = f"🔔 <b>Instagram Monitor</b>\n\n👤 {user} changed profile picture!"
+                    send_telegram_notification(telegram_message, profile_pic_file)
+
                 if func_ver == 2:
                     print(f"Check interval:\t\t{display_time(r_sleep_time)} ({get_range_of_dates_from_tss(int(time.time()) - r_sleep_time, int(time.time()), short=True)})")
                     print_cur_ts("Timestamp:\t\t")
@@ -776,6 +785,25 @@ def detect_changed_profile_picture(user, profile_image_url, profile_pic_file, pr
                 print_cur_ts("Timestamp:\t\t")
         if func_ver == 1:
             print_cur_ts("\nTimestamp:\t\t")
+
+
+# Function to send Telegram notification
+def send_telegram_notification(message, image_file=""):
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        try:
+            if image_file:
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+                payload = {"chat_id": TELEGRAM_CHAT_ID, "caption": message}
+                files = {"photo": open(image_file, "rb")}
+                req.post(url, data=payload, files=files)
+            else:
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+                payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+                req.post(url, data=payload)
+        except Exception as e:
+            print(f"Error sending Telegram notification - {e}")
+    else:
+        print("Error sending Telegram notification - Telegram settings are not configured")
 
 
 # Main function monitoring activity of the specified Instagram user
@@ -1464,7 +1492,7 @@ def instagram_monitor_user(user, error_notification, csv_file_name, csv_exists, 
                     m_body = f"Followers number changed for user {user} from {followers_old_count} to {followers_count} ({followers_diff_str})\n{removed_followers_mbody}{removed_followers_list}{added_followers_mbody}{added_followers_list}\nCheck interval: {display_time(r_sleep_time)} ({get_range_of_dates_from_tss(int(time.time()) - r_sleep_time, int(time.time()), short=True)}){get_cur_ts(nl_ch + 'Timestamp: ')}"
                 else:
                     m_body = f"Followers number changed for user {user} from {followers_old_count} to {followers_count} ({followers_diff_str})\n\nCheck interval: {display_time(r_sleep_time)} ({get_range_of_dates_from_tss(int(time.time()) - r_sleep_time, int(time.time()), short=True)}){get_cur_ts(nl_ch + 'Timestamp: ')}"
-                print(f"Sending email notification to {RECEIVER_EMAIL}\n")
+                print(f"Sending email notification to {RECEIVER_EMAIL}")
                 send_email(m_subject, m_body, "", SMTP_SSL)
 
             followers_old_count = followers_count
@@ -1625,7 +1653,7 @@ def instagram_monitor_user(user, error_notification, csv_file_name, csv_exists, 
                                     print(f"Story video saved to '{story_video_filename}'")
 
                         m_body_html_pic_saved_text = ""
-                        story_image_filename = f'instagram_{user}_story_{local_dt.strftime("%Y%m%d_%H%M%S")}.jpeg'
+                        story_image_filename = f'instagram_{user}_story_{local_dt.strftime("%Y%m%d_%H%M%S")}.jpeg"
                         if story_thumbnail_url:
                             if not os.path.isfile(story_image_filename):
                                 if save_pic_video(story_thumbnail_url, story_image_filename, local_ts):
@@ -1790,7 +1818,7 @@ def instagram_monitor_user(user, error_notification, csv_file_name, csv_exists, 
                                 print(f"Post video saved to '{video_filename}'")
 
                     m_body_html_pic_saved_text = ""
-                    image_filename = f'instagram_{user}_post_{highestinsta_dt.strftime("%Y%m%d_%H%M%S")}.jpeg'
+                    image_filename = f'instagram_{user}_post_{highestinsta_dt.strftime("%Y%m%d_%H%M%S")}.jpeg"
                     if thumbnail_url:
                         if not os.path.isfile(image_filename):
                             if save_pic_video(thumbnail_url, image_filename, highestinsta_ts):

@@ -12,6 +12,7 @@ instagram_monitor is an OSINT tool written in Python which allows for real-time 
 - Anonymous download of user's story images & videos; yes, user won't know you watched their stories 😉
 - Download of user's post images & reel videos
 - Email notifications for different events (new posts, reels & stories, changed followings, followers, bio, changed profile picture, visibility, errors)
+- Telegram notifications for all events with instant message delivery and media attachments
 - Attaching changed profile pictures and stories/posts/reels images directly in email notifications
 - Displaying the profile picture and stories/posts/reels images right in your terminal (if you have *imgcat* installed)
 - Saving all user activities and profile changes with timestamps to the CSV file
@@ -128,6 +129,41 @@ You can verify if your SMTP settings are correct by using **-z** parameter (the 
 ./instagram_monitor.py -z
 ```
 
+### Notifications Setup
+
+#### Email Notifications
+To enable email notifications, configure the SMTP settings in the script:
+
+```python
+SMTP_HOST = "your_smtp_server_ssl"
+SMTP_PORT = 587
+SMTP_USER = "your_smtp_user"
+SMTP_PASSWORD = "your_smtp_password"
+SMTP_SSL = True
+SENDER_EMAIL = "your_sender_email"
+RECEIVER_EMAIL = "your_receiver_email"
+```
+
+#### Telegram Notifications
+To enable Telegram notifications, follow these steps:
+
+1. Create a Telegram bot:
+   - Start a chat with [@BotFather](https://t.me/botfather)
+   - Use the `/newbot` command to create a new bot
+   - Copy the bot token provided by BotFather
+
+2. Get your chat ID:
+   - Start a chat with your newly created bot
+   - Visit `https://api.telegram.org/bot<YourBOTToken>/getUpdates`
+   - Find your chat ID in the JSON response
+
+3. Configure Telegram settings in the script:
+```python
+TELEGRAM_BOT_TOKEN = "your_bot_token"  # Bot token from BotFather
+TELEGRAM_CHAT_ID = "your_chat_id"      # Your chat ID
+TELEGRAM_NOTIFICATIONS_ENABLED = True   # Enable Telegram notifications
+```
+
 ### Other settings
 
 All other variables can be left at their defaults, but feel free to experiment with it.
@@ -209,7 +245,6 @@ Example email:
 <p align="center">
    <img src="./assets/instagram_monitor_email_notifications.png" alt="instagram_monitor_email_notifications" width="80%"/>
 </p>
-
 
 ### Saving user activities to the CSV file
 
